@@ -16,88 +16,128 @@ class Views {
 	let screenSize = CGSize(width: UIScreen.mainScreen().bounds.width, height: UIScreen.mainScreen().bounds.height)
 	let screenCenter = CGPoint(x: UIScreen.mainScreen().bounds.width / 2, y: UIScreen.mainScreen().bounds.height / 2)
 
-//	func genMainView(addButton: getButton) -> UIView {
-//		let mainView = UIView()
-//		mainView.frame = CGRectMake(0, 0, screenSize.width, screenSize.height)
-//		mainView.backgroundColor = UIColor.clearColor()
-//		mainView.alpha = 0.7
-//
-//		let point0 = CGPointMake(0, 20)
-//		let color0 = UIColor.orangeColor()
-//		let cardView0 = genCardView(point0, color: color0)
-//		cardView0.tag = 10
-//		mainView.addSubview(cardView0)
-//
-//		let point1 = CGPointMake(0, screenSize.height - 80)
-//		let color1 = UIColor.greenColor()
-//		let cardView1 = genCardView(point1, color: color1)
-//		cardView1.tag = 11
-//		mainView.addSubview(cardView1)
-//
-//		let point2 = CGPointMake(0, screenSize.height - 40)
-//		let color2 = UIColor.blueColor()
-//		let cardView2 = genCardView(point2, color: color2)
-//		cardView2.tag = 12
-//		mainView.addSubview(cardView2)
-//
-//		for i in 0..<3 {
-//			if let button = mainView.subviews[i].subviews[0] as? UIButton {
-//				button.tag = 100 + i
-//				addButton(button)
-//			}
-//		}
-//
-//		return mainView
-//	}
+	let backgroundColor = UIColor(red: 236/255, green: 235/255, blue: 243/255, alpha: 1.0)
 
-	func genCardView(point: CGPoint, color: UIColor, title: String) -> UIView {
+
+	func getCardViews(viewController: UIViewController) -> [UIView] {
+		var cardViews = [UIView]()
+
+		let rects = getFrames(viewController.view.frame)
+		let colors = getColors()
+		let titles = ["Characters", "Words", "Sentences"]
+
+		for i in 0..<3 {
+			let card = cardView(rects[i], color: colors[i], title: titles[i])
+			card.tag = 10 + i
+			if let button = card.subviews[0] as? UIButton {
+				button.tag = 100 + i
+				button.addTarget(viewController, action: "selected:", forControlEvents: .TouchUpInside)
+			}
+			cardViews.append(card)
+			viewController.view.addSubview(card)
+		}
+
+		return cardViews
+	}
+
+	func getPoint(rect: CGRect) -> [CGPoint] {
+		let point0 = CGPointMake(0, 20)
+		let point1 = CGPointMake(0, rect.height - 100)
+		let point2 = CGPointMake(0, rect.height - 50)
+
+		let points = [point0, point1, point2]
+		return points
+	}
+
+	func getFrames(rect: CGRect) -> [CGRect] {
+		let frame0 = CGRectMake(2, 20, rect.width - 4, rect.height * 0.75 - (rect.height * 0.0125))
+		let frame1 = CGRectMake(5, rect.height - 95, rect.width - 10, rect.height * 0.75 - (rect.height * 0.3125))
+		let frame2 = CGRectMake(2, rect.height - 48, rect.width - 4, rect.height * 0.75 - (rect.height * 0.0125))
+
+		let frames = [frame0, frame1, frame2]
+		return frames
+	}
+
+	func getColors() -> [UIColor] {
+		let color0 = UIColor(red: 175/255, green: 70/255, blue: 70/255, alpha: 1.0)
+		let color1 = UIColor(red: 139/255, green: 144/255, blue: 97/255, alpha: 1.0)
+		let color2 = UIColor(red: 106/255, green: 96/255, blue: 119/255, alpha: 1.0)
+
+		let colors = [color0, color1, color2]
+		return colors
+	}
+
+	func getBlurView(viewController: UIViewController) {
+		let effect = UIBlurEffect(style: .ExtraLight)
+		let blurView = UIVisualEffectView(effect: effect)
+		blurView.frame = viewController.view.bounds
+
+		viewController.view.addSubview(blurView)
+	}
+
+	func getFakeBlurView(viewController: UIViewController) {
+		let fakeBlurView = UIView(frame: viewController.view.bounds)
+		fakeBlurView.backgroundColor = UIColor.blackColor()
+		fakeBlurView.alpha = 0.5
+
+		viewController.view.addSubview(fakeBlurView)
+	}
+
+	func cardView(rect: CGRect, color: UIColor, title: String) -> UIView {
 		let cardView = UIView()
-		cardView.frame.origin = point
-		cardView.frame.size = CGSizeMake(screenSize.width, screenSize.height * 0.7)
-		cardView.backgroundColor = UIColor.whiteColor()
+		cardView.frame = rect
+		cardView.backgroundColor = backgroundColor
 		cardView.layer.cornerRadius = 10
 		cardView.clipsToBounds = true
 
 		let titleButton = UIButton(type: .System)
 		titleButton.frame.origin = CGPoint.zero
-		titleButton.frame.size = CGSizeMake(screenSize.width, 40)
+		titleButton.frame.size = CGSizeMake(screenSize.width, 50)
 		titleButton.backgroundColor = color
-		titleButton.tag = Int(point.y)
-		titleButton.setTitle(title, forState: .Normal)
-		titleButton.tintColor = UIColor.whiteColor()
+		let titleLabel = buttonTitleLabel(title)
+		titleButton.addSubview(titleLabel)
+
 		cardView.addSubview(titleButton)
+
+		if color == getColors()[0] {
+			let frame = CGRect(x: 10, y: 30, width: cardView.frame.width - 20, height: cardView.frame.height * 0.6)
+			let labelView = charactersLabelView(frame, text0: "迟", text1: "词")
+			cardView.addSubview(labelView)
+		}
 
 		return cardView
 	}
 
-	func genQAView(delegate: UITextFieldDelegate, rect: CGRect) -> UIView {
-		let contentView = UIView(frame: rect)
-
-		let texts = ["私活", "失火", "似乎"]
-		let width = (screenSize.width - 20) / 3
-
-		for i in 0..<3 {
-			let label = UILabel(frame: CGRectMake(10 + (width * CGFloat(i)), 0, width, 50))
-			label.textAlignment = .Center
-			label.textColor = UIColor.redColor()
-			label.font = UIFont.boldSystemFontOfSize(18)
-			label.text = texts[i]
-			contentView.addSubview(label)
-
-			let textField = UITextField(frame: CGRectMake(10 + width * CGFloat(i), 55, width, 30))
-			textField.tag = 1000 + i
-			textField.placeholder = "here"
-			textField.textAlignment = .Center
-			textField.keyboardType = .ASCIICapable
-			textField.spellCheckingType = .No
-			textField.autocorrectionType = .No
-			textField.delegate = delegate
-			contentView.addSubview(textField)
-
-		}
-
-		return contentView
+	func buttonTitleLabel(text: String) -> UILabel {
+		let label = UILabel()
+		label.frame.origin = CGPointMake(10, 5)
+		label.frame.size = CGSizeMake(screenSize.width / 2, 40)
+		label.text = text
+		label.textColor = UIColor.whiteColor()
+		label.font = UIFont.boldSystemFontOfSize(18)
+		return label
 	}
+
+	func charactersLabelView(frame: CGRect, text0: String, text1: String) -> UIView {
+		let labelView = UIView(frame: frame)
+
+		let label0 = UILabel(frame: CGRect(x: 0, y: 0, width: labelView.frame.width / 2, height: labelView.frame.height))
+		label0.text = text0
+		label0.textColor = getColors()[0]
+		label0.textAlignment = .Center
+		label0.font = UIFont.boldSystemFontOfSize(18)
+		labelView.addSubview(label0)
+
+		let label1 = UILabel(frame: CGRect(x: labelView.frame.width / 2, y: 0, width: labelView.frame.width / 2, height: labelView.frame.height))
+		label1.text = text1
+		label1.textColor = getColors()[0]
+		label1.textAlignment = .Center
+		label1.font = UIFont.boldSystemFontOfSize(18)
+		labelView.addSubview(label1)
+
+		return labelView
+	}
+
 
 
 
