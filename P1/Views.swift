@@ -11,6 +11,15 @@ import UIKit
 
 typealias getButton = (UIButton) -> Void
 
+func delay(seconds seconds: Double, completion:()->()) {
+	let popTime = dispatch_time(DISPATCH_TIME_NOW, Int64( Double(NSEC_PER_SEC) * seconds ))
+
+	dispatch_after(popTime, dispatch_get_main_queue()) {
+		completion()
+	}
+
+}
+
 class Views {
 
 	let screenSize = CGSize(width: UIScreen.mainScreen().bounds.width, height: UIScreen.mainScreen().bounds.height)
@@ -31,7 +40,6 @@ class Views {
 			card.tag = 10 + i
 			if let button = card.subviews[0] as? UIButton {
 				button.tag = 100 + i
-				button.addTarget(viewController, action: "selected:", forControlEvents: .TouchUpInside)
 			}
 			cardViews.append(card)
 			viewController.view.addSubview(card)
@@ -50,9 +58,9 @@ class Views {
 	}
 
 	func getFrames(rect: CGRect) -> [CGRect] {
-		let frame0 = CGRectMake(2, 20, rect.width - 4, rect.height * 0.75 - (rect.height * 0.0125))
+		let frame0 = CGRectMake(0, 20, rect.width, rect.height * 0.75)
 		let frame1 = CGRectMake(5, rect.height - 95, rect.width - 10, rect.height * 0.75 - (rect.height * 0.3125))
-		let frame2 = CGRectMake(2, rect.height - 48, rect.width - 4, rect.height * 0.75 - (rect.height * 0.0125))
+		let frame2 = CGRectMake(0, rect.height - 50, rect.width, rect.height * 0.75)
 
 		let frames = [frame0, frame1, frame2]
 		return frames
@@ -83,6 +91,24 @@ class Views {
 		viewController.view.addSubview(fakeBlurView)
 	}
 
+	func getInvisibleButtons(viewController: UIViewController) -> [UIButton] {
+		var buttons = [UIButton]()
+
+		let rect = viewController.view.frame
+
+		for i in 0..<2 {
+			let button = UIButton(type: .System)
+			button.frame = CGRect(x: 0, y: rect.height - 100 + CGFloat(50 * i), width: rect.width, height: 50)
+			button.backgroundColor = UIColor.clearColor()
+			button.addTarget(viewController, action: "selected:", forControlEvents: .TouchUpInside)
+
+			buttons.append(button)
+			viewController.view.addSubview(button)
+		}
+
+		return buttons
+	}
+
 	func cardView(rect: CGRect, color: UIColor, title: String) -> UIView {
 		let cardView = UIView()
 		cardView.frame = rect
@@ -96,13 +122,13 @@ class Views {
 		titleButton.backgroundColor = color
 		let titleLabel = buttonTitleLabel(title)
 		titleButton.addSubview(titleLabel)
-
 		cardView.addSubview(titleButton)
 
 		if color == getColors()[0] {
-			let frame = CGRect(x: 10, y: 30, width: cardView.frame.width - 20, height: cardView.frame.height * 0.6)
-			let labelView = charactersLabelView(frame, text0: "迟", text1: "词")
-			cardView.addSubview(labelView)
+			let frame = CGRect(x: cardView.frame.width * 0.3 / 2, y: 60, width: cardView.frame.width * 0.7, height: 100)
+			let texts = ["吃", "持", "词", "迟", "chi", "ci", "chi"]
+			let labels = charactersLabelView(frame, color: color, text: texts)
+			cardView.addSubview(labels)
 		}
 
 		return cardView
@@ -118,25 +144,42 @@ class Views {
 		return label
 	}
 
-	func charactersLabelView(frame: CGRect, text0: String, text1: String) -> UIView {
+	func charactersLabelView(frame: CGRect, color: UIColor, text: [String]) -> UIView {
 		let labelView = UIView(frame: frame)
 
-		let label0 = UILabel(frame: CGRect(x: 0, y: 0, width: labelView.frame.width / 2, height: labelView.frame.height))
-		label0.text = text0
-		label0.textColor = getColors()[0]
-		label0.textAlignment = .Center
-		label0.font = UIFont.boldSystemFontOfSize(18)
-		labelView.addSubview(label0)
+		let width = frame.width / 4
+		let height: CGFloat = 35
 
-		let label1 = UILabel(frame: CGRect(x: labelView.frame.width / 2, y: 0, width: labelView.frame.width / 2, height: labelView.frame.height))
-		label1.text = text1
-		label1.textColor = getColors()[0]
-		label1.textAlignment = .Center
-		label1.font = UIFont.boldSystemFontOfSize(18)
-		labelView.addSubview(label1)
+		for i in 0..<4 {
+			let x = width * CGFloat(i)
+			let label = UILabel(frame: CGRect(x: x, y: frame.origin.y, width: width, height: height))
+			label.tag = 1000 + i
+			label.text = text[i]
+			label.textAlignment = .Center
+			labelView.addSubview(label)
+		}
+
+		let label_4 = UILabel(frame: CGRect(x: 0, y: frame.origin.y + 35, width: width * 2, height: height))
+		label_4.tag = 1004
+		label_4.textAlignment = .Center
+		label_4.textColor = color
+		label_4.text = text[4]
+		labelView.addSubview(label_4)
+
+		for i in 5..<7 {
+			let x = (width * 2) + CGFloat(i - 5) * width
+			let label = UILabel(frame: CGRect(x: x, y: frame.origin.y + 35, width: width, height: height))
+			label.tag = 1000 + i
+			label.text = text[i]
+			label.textColor = color
+			label.textAlignment = .Center
+			labelView.addSubview(label)
+		}
 
 		return labelView
 	}
+
+
 
 
 

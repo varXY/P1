@@ -15,6 +15,8 @@ class ViewController: UIViewController {
 	var cardView1 = UIView()
 	var cardView2 = UIView()
 
+	var buttons = [UIButton]()
+
 	var cardViews = [UIView]()
 	var colors = [UIColor]()
 	var rects = [CGRect]()
@@ -33,7 +35,7 @@ class ViewController: UIViewController {
 
 		rects = views.getFrames(view.frame)
 		cardViews = views.getCardViews(self)
-
+		buttons = views.getInvisibleButtons(self)
 	}
 
 
@@ -46,6 +48,7 @@ class ViewController: UIViewController {
 
 			if card.frame == rects[1] {
 				cardView1 = card
+
 			}
 
 			if card.frame == rects[2] {
@@ -53,8 +56,8 @@ class ViewController: UIViewController {
 			}
 		}
 
-		if sender == cardView1.subviews[0] as! UIButton {
-			changeToColor(sender.backgroundColor!)
+		if sender == buttons[0] {
+			changeToColor(cardView1.subviews[0].backgroundColor!)
 			moveTo(cardView1, rect: rects[0])
 
 			if cardView0.tag < cardView2.tag {
@@ -67,8 +70,8 @@ class ViewController: UIViewController {
 			}
 		}
 
-		if sender == cardView2 .subviews[0] as! UIButton {
-			changeToColor(sender.backgroundColor!)
+		if sender == buttons[1] {
+			changeToColor(cardView2.subviews[0].backgroundColor!)
 			moveTo(cardView2, rect: rects[0])
 
 			if cardView0.tag < cardView1.tag {
@@ -76,9 +79,14 @@ class ViewController: UIViewController {
 				moveTo(cardView1, rect: rects[2])
 				moveTo(cardView0, rect: rects[1])
 			} else {
+				view.bringSubviewToFront(cardView0)
 				moveTo(cardView0, rect: rects[2])
 			}
 		}
+
+		view.bringSubviewToFront(buttons[0])
+		view.bringSubviewToFront(buttons[1])
+
 	}
 
 	func changeToColor(color: UIColor) {
@@ -92,7 +100,7 @@ class ViewController: UIViewController {
 
 		let duration = Double(self.view.frame.height * 0.00140845)
 
-		UIView.animateWithDuration(duration, delay: 0.0, usingSpringWithDamping: 0.999, initialSpringVelocity: 10.0, options: [], animations: { () -> Void in
+		UIView.animateWithDuration(duration, delay: 0.0, usingSpringWithDamping: 0.999, initialSpringVelocity: 7.0, options: [], animations: { () -> Void in
 			view.frame = rect
 
 			}, completion: nil)
